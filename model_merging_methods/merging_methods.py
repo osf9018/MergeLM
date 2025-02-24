@@ -30,6 +30,22 @@ class MergingMethod:
             if param_name in params:
                 param_value.data.copy_(params[param_name])
 
+    def head_average_merging(self, models_to_merge: list):
+        """
+        average merging of models' heads
+        :param models_to_merge: list, individual models that need to be merged
+        """
+        # get parameters' values of models' heads
+        models_to_merge_param_dict = defaultdict(list)
+        for model_to_merge in models_to_merge:
+            for param_name, param_value in model_to_merge.named_parameters():
+                if param_name.startswith('classifier'):
+                    models_to_merge_param_dict[param_name].append(param_value)
+        # average merging of individual models' parameters of heads
+        with torch.no_grad():
+            averaged_params = {param_name: torch.stack(model_to_merge_param, dim=0).mean(dim=0) for param_name, model_to_merge_param in models_to_merge_param_dict.items()}
+        return averaged_params
+
     def average_merging(self, models_to_merge: list, exclude_param_names_regex: list):
         """
         average merging method
@@ -605,7 +621,7 @@ class MergingMethod:
                          nums_fisher_examples: list = None, fisher_scaling_coefficients: list = None, normalize_fisher_weight: bool = True, minimal_fisher_weight: float = 1e-6,
                          nums_regmean_examples: list = None, reduce_non_diagonal_ratio: float = 1.0, param_value_mask_rate: float = 0.8,
                          weight_format: str = "delta_weight", weight_mask_rates: list = None, use_weight_rescale: bool = True, mask_strategy: str = "random",
-                         mask_apply_method: str = "average_merging", models_use_deepcopy: bool = False):
+                         mask_apply_method: str = "average_merging", models_use_deepcopy: bool = False, merge_head_flag: bool = False):
         """
         merge the parameters of models_to_merge to merged_model
         :param merged_model: nn.Module, the merged model
@@ -626,6 +642,7 @@ class MergingMethod:
         :param mask_strategy: str, mask strategy, can be "random" and "magnitude"
         :param mask_apply_method: str, merging method that the mask strategy applies
         :param models_use_deepcopy: boolean, whether to deepcopy the models
+        :param merge_head_flag: boolean, whether the merge is applied to the heads of the models with averaging
         :return:
         """
         # merged_params, dict of parameters
@@ -635,6 +652,9 @@ class MergingMethod:
                                             nums_regmean_examples=nums_regmean_examples, reduce_non_diagonal_ratio=reduce_non_diagonal_ratio, param_value_mask_rate=param_value_mask_rate,
                                             weight_format=weight_format, weight_mask_rates=weight_mask_rates, use_weight_rescale=use_weight_rescale, mask_strategy=mask_strategy,
                                             mask_apply_method=mask_apply_method, models_use_deepcopy=models_use_deepcopy)
+        if merge_head_flag:
+            head_merged_params = self.head_average_merging(models_to_merge)
+            merged_params.update(head_merged_params)
         self.copy_params_to_model(params=merged_params, model=merged_model)
 
         return merged_model
