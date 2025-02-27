@@ -14,7 +14,8 @@ glue_data_keys_map = {
     "qqp": ("question1", "question2"),
     "mnli": ("premise", "hypothesis"),
     "qnli": ("question", "sentence"),
-    "rte": ("sentence1", "sentence2")
+    "rte": ("sentence1", "sentence2"),
+    "wnli": ("sentence1", "sentence2")
 }
 
 glue_data_metrics_map = {
@@ -25,7 +26,8 @@ glue_data_metrics_map = {
     "qqp": "averaged_scores",    # average of accuracy and f1
     "mnli": "accuracy",
     "qnli": "accuracy",
-    "rte": "accuracy"
+    "rte": "accuracy",
+    "wnli": "accuracy"
 }
 
 glue_data_num_labels_map = {
@@ -36,7 +38,8 @@ glue_data_num_labels_map = {
     "qqp": 2,
     "mnli": 3,
     "qnli": 2,
-    "rte": 2
+    "rte": 2,
+    "wnli": 2
 }
 
 glue_data_id_map = {
@@ -47,7 +50,8 @@ glue_data_id_map = {
     "qqp": 4,
     "mnli": 5,
     "qnli": 6,
-    "rte": 7
+    "rte": 7,
+    "wnli": 8
 }
 
 rev_glue_data_id_map = {value: key for key, value in glue_data_id_map.items()}
