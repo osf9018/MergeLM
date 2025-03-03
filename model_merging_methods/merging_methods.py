@@ -657,7 +657,9 @@ class MergingMethod:
             merged_params.update(head_merged_params)
         self.copy_params_to_model(params=merged_params, model=merged_model)
         if merge_head_flag:
-            merged_model.classifier.weight = merged_params['classifier.weight']
-            merged_model.classifier.bias = merged_params['classifier.bias']
+            with torch.no_grad():
+                merged_model.classifier = copy.deepcopy(models_to_merge[0].classifier)
+                merged_model.classifier.weight.data.copy_(merged_params['classifier.weight'])
+                merged_model.classifier.bias.data.copy_(merged_params['classifier.bias'])
 
         return merged_model
