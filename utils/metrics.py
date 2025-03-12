@@ -61,9 +61,11 @@ def compute_metrics(eval_pred: EvalPrediction, dataset_names: list):
             predictions = np.squeeze(eval_pred.predictions, axis=1)
         # load the metric function from huggingface or cache
         try:
-            metric_func = evaluate.load(path=os.path.join(cache_dir, "evaluate/metrics/glue"), config_name=dataset_name)
+            #metric_func = evaluate.load(path=os.path.join(cache_dir, "evaluate/metrics/glue"), config_name=dataset_name)
+            metric_func = evaluate.load(path="glue", config_name=dataset_name)
         except:
-            metric_func = evaluate.load(path="glue", config_name=dataset_name, cache_dir=cache_dir)
+            #metric_func = evaluate.load(path="glue", config_name=dataset_name, cache_dir=cache_dir)
+            metric_func = evaluate.load(path="glue", config_name=dataset_name)
         result = metric_func.compute(predictions=predictions, references=eval_pred.label_ids)
         if len(result.keys()) > 1:
             # .item() -> convert numpy.float64 to float
